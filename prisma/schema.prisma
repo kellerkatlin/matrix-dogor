@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  username   String   @unique
+  password   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  matrices   Matrix[]
+  roleId     Int
+  isLoggedIn Boolean   @default(false)
+  status     Boolean   @default(true)
+  role       Role      @relation(fields: [roleId], references: [id])
+  companies   CompanyUser[] 
+}
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+model Company {
+  id         Int          @id @default(autoincrement())
+  name       String       @unique
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  matrices   Matrix[]     
+  users      CompanyUser[] 
+}
+
+model CompanyUser {
+  userId    Int
+  companyId Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([userId, companyId]) 
+}
+
+model Matrix {
+  id            Int         @id @default(autoincrement())
+  name          String      
+  riskLevels    RiskLevel[] 
+  events        Event[]
+  probabilities Probability[] 
+  impacts       Impact[]     
+  userId        Int
+  companyId     Int
+  user          User        @relation(fields: [userId], references: [id])
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model RiskLevel {
+  id        Int      @id @default(autoincrement())
+  color     String
+  label     String
+  min       Int
+  max       Int
+  matrixId  Int
+  matrix  Matrix  @relation(fields: [matrixId], references:[id], onDelete: Cascade) 
+}
+
+model Domain {
+  id          Int           @id @default(autoincrement())
+  title       String
+  subdomains  Subdomain[]   
+}
+
+model Subdomain {
+  id        Int        @id @default(autoincrement())
+  title     String
+  domainId  Int
+  domain    Domain     @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  controls  Control[]  // Relación con los controles
+}
+
+model Control {
+  id          Int          @id @default(autoincrement())
+  title       String
+  subdomainId Int
+  subdomain   Subdomain    @relation(fields: [subdomainId], references: [id], onDelete: Cascade)
+  events      EventControl[]      
+}
+
+model Event {
+  id         Int    @id @default(autoincrement())
+  name       String
+  probability Int
+  impact     Int
+  value      Int
+  riskLevel  String
+  matrixId   Int
+  matrix     Matrix @relation(fields: [matrixId], references: [id], onDelete: Cascade)
+  controls    EventControl[] 
+}
+
+model EventControl {
+  eventId     Int
+  controlId   Int
+  event       Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  control   Control @relation(fields: [controlId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, controlId]) 
+}
+
+model Probability {
+  id        Int   @id @default(autoincrement())
+  value     Int   
+  matrixId  Int   
+  matrix    Matrix @relation(fields: [matrixId], references: [id], onDelete: Cascade)
+}
+
+model Impact {
+  id        Int   @id @default(autoincrement())
+  value     Int  
+  matrixId  Int    
+  matrix    Matrix @relation(fields: [matrixId], references: [id], onDelete: Cascade)
+}
