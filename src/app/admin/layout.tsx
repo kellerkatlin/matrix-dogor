@@ -69,7 +69,7 @@ export default function Layout({
                     <div className="flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-gray-100">
                         <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
                             <div className="flex items-center flex-shrink-0 px-4 ">
-                                <h1>Grupo 5</h1>
+                                <h1>Grupo 6</h1>
                             </div>
                             <nav className="mt-5 flex-1" aria-label="Sidebar">
                                 <div className="px-2 space-y-1">
